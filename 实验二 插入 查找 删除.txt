@@ -1,0 +1,149 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<conio.h>
+struct student//首先，先定义个结构 
+	{
+		int num;
+		float score;
+		struct student *next;
+	};
+struct student *create_head()//现在创建一个只有头结点的空链表
+	{
+		struct student *head;
+		head=(struct student*)malloc(sizeof (struct student) );
+			if(head==NULL)            
+				{
+					printf("考生学号或者成绩输入有问题!\n");
+					return NULL;
+				}
+		head->next=NULL;
+		return head;
+	}
+struct student *insert(struct student *head,struct student *s)//这一段实现了让学生学号保持升序 
+	{
+		struct student *p=head;
+		while(p->next!=NULL&&s->num>p->next->num)
+			p=p->next;
+		if(p->next==NULL) //找到学号最大的时候    
+			{
+				p->next=s;    
+				s->next=NULL;   
+			}
+		else 
+			{
+				s->next=p->next;
+				p->next=s;    
+				
+			}
+		return head ;
+	}
+struct student *search(struct student *head)//这段结构用来查找 
+	{
+		struct student *p=head->next;
+		int num;
+		printf("请输入要查找学生的学号:\n");
+		scanf("%d",&num);
+		while(p!=NULL&&p->num!=num)   
+			p=p->next;
+		if(p==NULL)             //这里的if不能调换 
+			{
+				printf("找不到符合条件的考生!!!\n,回到主菜单\n");
+				return NULL;			
+			}
+		if(p->num==num)
+			{
+				printf("找到符合条件的考生,该考生为:学号:%d\t，成绩:%f\n",p->num,p->score);
+				printf("回到主菜单\n");
+				return p;					
+			}	
+	}
+void print(struct student *head)//打印链表 
+	{
+		struct student *p;
+		p=head->next;
+		while(p!=NULL)
+			{
+				printf("%d\t%.1f\n",p->num,p->score);
+				p=p->next;
+			}
+	}
+
+void free_list(struct student *head)//清空链表
+	{
+		struct student *p=head ;
+		while(p!=NULL)
+		{
+			head=head->next;
+			free(p);
+			p=head;
+		}
+	}
+
+struct student *delete_note(struct student *head,int num_x)//这段用来删除 
+	{
+		struct student *p1=head->next , *p2=head ;
+		while(p1!=NULL&&p1->num!=num_x)  //这里犯了个错误，&&左右条件不能调换,若调换如果p1指向NULL时p1->num运行出错
+			{
+				p2=p1;
+				p1=p1->next;
+			}
+		if(p1==NULL)   
+				printf("找不到符合删除要求的学号!!!\n");
+				printf("即将返回主菜单\n");
+		if(p1->num==num_x)
+			{
+				p2->next=p1->next;
+				free(p1);
+				printf("学生删除成功!\n");
+			}
+		return head;
+	}
+int main()//主函数 
+{
+	struct student *p , *head ;
+	char c;
+	int num ;
+	float score ;
+	head=create_head();
+	while(1)
+	{   printf("##############某个超级垃圾的成绩管理系统###########\n"); 
+		printf("1:插入成绩(学号自动升序)\n");
+		printf("2:输出成绩\n");
+		printf("3:查找学号\n");
+		printf("4:删除学号\n");
+		printf("其他键盘输入:退出程序\n");
+		printf("###################################################\n"); 
+		c=getch();
+		switch(c)
+		{
+			case'1':
+				printf("请分别输入要插入学生的学号和分数:\n");
+				scanf("%d%f",&num,&score);
+				p=(struct student*)malloc( sizeof(struct student) );
+				if(p==NULL)
+					{
+						printf("该考生学号或成绩无效!!!\n");
+						exit (0) ;
+					}
+				p->num=num;  p->score=score;   //给p赋值
+				insert(head,p);
+				printf("插入成功!\n");
+				printf("即将返回主菜单\n"); 
+				break;
+			case'2':
+				print(head);
+				break;
+			case'3':
+				search(head);
+				break;
+			case'4':
+				printf("请输入要删除的学生的学号:\n");
+				scanf("%d",&num);
+				delete_note(head,num);
+				break;
+			default:
+				free_list(head);
+				exit (0);
+		}
+	}
+}
